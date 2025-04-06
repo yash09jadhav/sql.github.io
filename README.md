@@ -1,4 +1,3 @@
-# sql.github.io
 ### Q1 For each customer, identify their highest order and tag it as 'Top Order', all others as 'Regular'.
 SELECT *,
 CASE
