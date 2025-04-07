@@ -32,3 +32,38 @@ SELECT *,
 AVG(total_amount) OVER(PARTITION BY customer_id ORDER BY order_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rolling_avg
 FROM orders_sample;
 
+### Q6 For each customer, identify the number of days between consecutive orders and flag any gap greater than 7 days.
+SELECT customer_id,order_id,order_date, 
+DATEDIFF(order_date,LAG(order_date) OVER(PARTITION BY customer_id ORDER BY order_date)) AS days_since_last,
+CASE
+    WHEN DATEDIFF(order_date,LAG(order_date) OVER(PARTITION BY customer_id ORDER BY order_date)) >=7 THEN 'yes'
+    ELSE 'no'
+END AS large_gap_flag
+FROM campusx.orders_sample;
+
+### Q7 For each customer, maintain a running count of orders where total_amount > 500.
+SELECT *,
+SUM(CASE WHEN total_amount > 500 THEN 1 ELSE 0 END)
+OVER (PARTITION BY customer_id ORDER BY order_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS count_above_500
+FROM orders_sample;
+
+### Q8 For each customer, flag the first order in any sequence where total_amount started to increase compared to previous order.
+SELECT *, 
+CASE 
+    WHEN total_amount > LAG(total_amount) OVER(PARTITION BY customer_id ORDER BY order_date) THEN 'yes'
+    ELSE 'no'
+END AS started_increasing
+FROM orders_sample;
+
+### Q9 For each customer, assign a session ID that increments whenever there's a gap of more than 30 days between their orders.
+``` sql
+SELECT *,
+  SUM(CASE WHEN date_diff > 30 THEN 1 ELSE 0 END)
+    OVER(PARTITION BY customer_id ORDER BY order_date) AS session_id
+FROM (
+  SELECT *,
+    DATEDIFF(order_date, LAG(order_date) OVER(PARTITION BY customer_id ORDER BY order_date)) AS date_diff
+  FROM orders_sample
+) t
+
+
