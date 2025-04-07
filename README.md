@@ -1,12 +1,15 @@
-### Q1 For each customer, identify their highest order and tag it as 'Top Order', all others as 'Regular'.
+Q1 For each customer, identify their highest order and tag it as 'Top Order', all others as 'Regular'
+``` sql
+
 SELECT *,
 CASE
     WHEN RANK() OVER(PARTITION BY customer_id ORDER BY total_amount DESC) = 1 THEN 'top_order'
     ELSE 'regular'
 END AS order_tag
 FROM campusx.orders_sample;
- 
-### Q2 For every order, calculate the number of days since that customer’s previous order.
+```
+
+Q2 For every order, calculate the number of days since that customer’s previous order.
 SELECT *, 
        DATEDIFF(order_date, LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date)) AS days_since_last_order
 FROM orders_sample;
